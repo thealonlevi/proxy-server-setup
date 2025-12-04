@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-SYSCTL_URL="${SYSCTL_URL:-https://raw.githubusercontent.com/REPLACE_ME_USER/REPLACE_ME_REPO/main/99-custom.conf}"
+SYSCTL_URL="${SYSCTL_URL:-https://raw.githubusercontent.com/thealonlevi/proxy-server-setup/main/99-custom.conf}"
 MAX_ULIMIT="${MAX_ULIMIT:-1048576}"
 
 if [[ $EUID -ne 0 ]]; then
@@ -33,8 +33,12 @@ apt-get update
 DEBIAN_FRONTEND=noninteractive apt-get install -y iptables-persistent
 
 for port in 25 465 587 110 995 143 993; do
-    iptables -A INPUT -p tcp --dport "$port" -j DROP
-    iptables -A OUTPUT -p tcp --dport "$port" -j DROP
+    if ! iptables -C INPUT -p tcp --dport "$port" -j DROP 2>/dev/null; then
+        iptables -A INPUT -p tcp --dport "$port" -j DROP
+    fi
+    if ! iptables -C OUTPUT -p tcp --dport "$port" -j DROP 2>/dev/null; then
+        iptables -A OUTPUT -p tcp --dport "$port" -j DROP
+    fi
 done
 
 iptables-save > /etc/iptables/rules.v4

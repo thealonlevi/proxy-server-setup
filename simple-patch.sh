@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-SYSCTL_URL="${SYSCTL_URL:-https://raw.githubusercontent.com/REPLACE_ME_USER/REPLACE_ME_REPO/main/99-custom.conf}"
+SYSCTL_URL="${SYSCTL_URL:-https://raw.githubusercontent.com/thealonlevi/proxy-server-setup/main/99-custom.conf}"
 MAX_ULIMIT="${MAX_ULIMIT:-1048576}"
 
 if [[ $EUID -ne 0 ]]; then

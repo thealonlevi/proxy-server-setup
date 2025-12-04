@@ -20,7 +20,7 @@ This script applies optimized system configurations for proxy servers, including
 ### Full Patch (with SMTP blocking)
 
 ```bash
-sudo bash -c "$(curl -fsSL https://raw.githubusercontent.com/REPLACE_ME_USER/REPLACE_ME_REPO/main/patcher.sh)"
+sudo bash -c "$(curl -fsSL https://raw.githubusercontent.com/thealonlevi/proxy-server-setup/main/patcher.sh)"
 ```
 
 This script:
@@ -34,14 +34,14 @@ This script:
 ### Simple Patch (without SMTP blocking)
 
 ```bash
-sudo bash -c "$(curl -fsSL https://raw.githubusercontent.com/REPLACE_ME_USER/REPLACE_ME_REPO/main/simple-patch.sh)"
+sudo bash -c "$(curl -fsSL https://raw.githubusercontent.com/thealonlevi/proxy-server-setup/main/simple-patch.sh)"
 ```
 
 This script performs the same configuration as `patcher.sh` but skips iptables installation and SMTP port blocking. Use this if you don't need mail port restrictions.
 
 ## Notes
 
-- **File descriptor limits**: While this script sets system-wide limits via `/etc/security/limits.d/`, for production proxy services, it's recommended to also set `LimitNOFILE` in your systemd service unit file for the proxy process. This provides more granular control and ensures the limit applies even if the system-wide limit changes.
+- **File descriptor limits**: This script sets system-wide limits via `/etc/security/limits.d/proxy-nofile.conf` for all users (`*`). For production proxy services, it's recommended to also set `LimitNOFILE` in your systemd service unit file for the proxy process. This provides more granular control and ensures the limit applies even if the system-wide limit changes.
 
 - **Sysctl tuning**: The configuration in `99-custom.conf` is optimized for high-concurrency workloads. Key optimizations include:
   - BBR congestion control
@@ -50,7 +50,16 @@ This script performs the same configuration as `patcher.sh` but skips iptables i
   - Reduced TCP keepalive timers
   - Security hardening (source route filtering, redirect blocking, etc.)
 
-- **Idempotency**: The scripts are designed to be run multiple times safely. They will overwrite existing configuration files and may append iptables rules on each run.
+- **Idempotency**: The scripts are designed to be run multiple times safely. They will overwrite existing configuration files. iptables rules are checked before adding to prevent duplicates.
+
+- **Environment variables**: Advanced users can override defaults via environment variables:
+  - `SYSCTL_URL`: Override the sysctl config URL (default: points to this repo)
+  - `MAX_ULIMIT`: Override the file descriptor limit (default: 1048576)
+  
+  Example:
+  ```bash
+  MAX_ULIMIT=524288 sudo bash -c "$(curl -fsSL https://raw.githubusercontent.com/thealonlevi/proxy-server-setup/main/patcher.sh)"
+  ```
 
 ## License
 
